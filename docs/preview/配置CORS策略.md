@@ -3,7 +3,7 @@ title: 在ASP.NET Core中配置CORS策略
 tags:
   - CORS
   - ASP.NET
-  — Program
+  - Program
 createTime: 2025/03/24 19:52:18
 permalink: /article/CORS/
 ---
