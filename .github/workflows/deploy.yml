@@ -50,9 +50,3 @@ jobs:
           target_branch: html
           # 部署目录为 VuePress 的默认输出目录
           build_dir: docs/.vuepress/dist
-
-      # 创建CNAME文件以保持自定义域名
-      - name: Create CNAME file
-        run: |
-          echo "blog.jianyandashu.com" > docs/.vuepress/dist/CNAME
-        if: success()
