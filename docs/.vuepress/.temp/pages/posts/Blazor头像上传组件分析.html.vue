@@ -1,0 +1,225 @@
+<template><div><h1 id="blazor-avatarupload-组件实现分析" tabindex="-1"><a class="header-anchor" href="#blazor-avatarupload-组件实现分析"><span>Blazor AvatarUpload 组件实现分析</span></a></h1>
+<h2 id="简介" tabindex="-1"><a class="header-anchor" href="#简介"><span>简介</span></a></h2>
+<p>在 Blazor 应用程序中，头像上传是一个常见的功能需求。本文将分析一个实现了头像上传功能的组件实现，包括其配置、使用方式和处理逻辑。</p>
+<h2 id="组件使用示例" tabindex="-1"><a class="header-anchor" href="#组件使用示例"><span>组件使用示例</span></a></h2>
+<div class="language-razor line-numbers-mode" data-highlighter="prismjs" data-ext="razor"><pre v-pre><code><span class="line"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>AvatarUpload</span> </span>
+<span class="line">    <span class="token attr-name">TValue</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>string<span class="token punctuation">"</span></span> </span>
+<span class="line">    <span class="token attr-name">Accept</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>image/*<span class="token punctuation">"</span></span> </span>
+<span class="line">    <span class="token special-attr"><span class="token attr-name">OnChange</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value javascript language-javascript">@OnAvatarUpload</span><span class="token punctuation">"</span></span></span> </span>
+<span class="line">    <span class="token attr-name">OnDelete</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value variable"><span class="token keyword">@</span><span class="token csharp language-csharp"><span class="token punctuation">(</span>fileName <span class="token operator">=></span> Task<span class="token punctuation">.</span><span class="token function">FromResult</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">)</span></span></span><span class="token punctuation">"</span></span><span class="token punctuation">></span></span></span>
+<span class="line"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>AvatarUpload</span><span class="token punctuation">></span></span></span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="组件属性说明" tabindex="-1"><a class="header-anchor" href="#组件属性说明"><span>组件属性说明</span></a></h2>
+<ol>
+<li>
+<p><strong>TValue=&quot;string&quot;</strong></p>
+<ul>
+<li>指定上传组件的值类型为字符串</li>
+<li>通常用于存储图片的URL或Base64编码</li>
+</ul>
+</li>
+<li>
+<p><strong>Accept=&quot;image/*&quot;</strong></p>
+<ul>
+<li>限制上传文件类型为图片</li>
+<li>支持所有图片格式（jpg, png, gif等）</li>
+</ul>
+</li>
+<li>
+<p><strong>OnChange=&quot;@OnAvatarUpload&quot;</strong></p>
+<ul>
+<li>文件上传改变时的回调方法</li>
+<li>处理文件上传逻辑</li>
+</ul>
+</li>
+<li>
+<p><strong>OnDelete</strong></p>
+<ul>
+<li>文件删除的回调方法</li>
+<li>这里使用简单的 Task.FromResult(true) 作为默认处理</li>
+</ul>
+</li>
+</ol>
+<h2 id="上传处理实现" tabindex="-1"><a class="header-anchor" href="#上传处理实现"><span>上传处理实现</span></a></h2>
+<div class="language-csharp line-numbers-mode" data-highlighter="prismjs" data-ext="cs"><pre v-pre><code><span class="line"><span class="token keyword">private</span> <span class="token keyword">async</span> <span class="token return-type class-name">Task</span> <span class="token function">OnAvatarUpload</span><span class="token punctuation">(</span><span class="token class-name">UploadFile</span> file<span class="token punctuation">)</span></span>
+<span class="line"><span class="token punctuation">{</span></span>
+<span class="line">    <span class="token keyword">if</span> <span class="token punctuation">(</span>file <span class="token operator">!=</span> <span class="token keyword">null</span> <span class="token operator">&amp;&amp;</span> file<span class="token punctuation">.</span>File <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span></span>
+<span class="line">    <span class="token punctuation">{</span></span>
+<span class="line">        <span class="token class-name"><span class="token keyword">var</span></span> format <span class="token operator">=</span> file<span class="token punctuation">.</span>File<span class="token punctuation">.</span>ContentType<span class="token punctuation">;</span></span>
+<span class="line">        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">CheckValidAvatarFormat</span><span class="token punctuation">(</span>format<span class="token punctuation">)</span><span class="token punctuation">)</span></span>
+<span class="line">        <span class="token punctuation">{</span></span>
+<span class="line">            ReadAvatarToken <span class="token operator">??=</span> <span class="token keyword">new</span> <span class="token constructor-invocation class-name">CancellationTokenSource</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></span>
+<span class="line">            <span class="token keyword">if</span> <span class="token punctuation">(</span>ReadAvatarToken<span class="token punctuation">.</span>IsCancellationRequested<span class="token punctuation">)</span></span>
+<span class="line">            <span class="token punctuation">{</span></span>
+<span class="line">                ReadAvatarToken<span class="token punctuation">.</span><span class="token function">Dispose</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></span>
+<span class="line">                ReadAvatarToken <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token constructor-invocation class-name">CancellationTokenSource</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></span>
+<span class="line">            <span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">            <span class="token comment">// 请求Base64格式的图片文件</span></span>
+<span class="line">            <span class="token keyword">await</span> file<span class="token punctuation">.</span><span class="token function">RequestBase64ImageFileAsync</span><span class="token punctuation">(</span>format<span class="token punctuation">,</span> <span class="token number">640</span><span class="token punctuation">,</span> <span class="token number">480</span><span class="token punctuation">,</span> MaxFileLength<span class="token punctuation">,</span> ReadAvatarToken<span class="token punctuation">.</span>Token<span class="token punctuation">)</span><span class="token punctuation">;</span></span>
+<span class="line">        <span class="token punctuation">}</span></span>
+<span class="line">        <span class="token keyword">else</span></span>
+<span class="line">        <span class="token punctuation">{</span></span>
+<span class="line">            file<span class="token punctuation">.</span>Code <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span></span>
+<span class="line">            file<span class="token punctuation">.</span>Error <span class="token operator">=</span> <span class="token string">"文件格式不正确"</span><span class="token punctuation">;</span></span>
+<span class="line">        <span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">        <span class="token keyword">if</span> <span class="token punctuation">(</span>file<span class="token punctuation">.</span>Code <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span></span>
+<span class="line">        <span class="token punctuation">{</span></span>
+<span class="line">            <span class="token keyword">await</span> MessageService<span class="token punctuation">.</span><span class="token function">Error</span><span class="token punctuation">(</span><span class="token interpolation-string"><span class="token string">$"头像上传 </span><span class="token interpolation"><span class="token punctuation">{</span><span class="token expression language-csharp">file<span class="token punctuation">.</span>Error</span><span class="token punctuation">}</span></span><span class="token string"> </span><span class="token interpolation"><span class="token punctuation">{</span><span class="token expression language-csharp">format</span><span class="token punctuation">}</span></span><span class="token string">"</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span></span>
+<span class="line">        <span class="token punctuation">}</span></span>
+<span class="line">        <span class="token keyword">await</span> <span class="token function">SaveToFile</span><span class="token punctuation">(</span>file<span class="token punctuation">)</span><span class="token punctuation">;</span></span>
+<span class="line">    <span class="token punctuation">}</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h1 id="blazor-文件上传实现详解-savetofile-方法剖析" tabindex="-1"><a class="header-anchor" href="#blazor-文件上传实现详解-savetofile-方法剖析"><span>Blazor 文件上传实现详解：SaveToFile 方法剖析</span></a></h1>
+<h2 id="简介-1" tabindex="-1"><a class="header-anchor" href="#简介-1"><span>简介</span></a></h2>
+<p>在 Web 应用开发中，文件上传是一个常见的需求。今天我们来分析一个在 Blazor 应用中实现的文件上传方法 <code v-pre>SaveToFile</code>，这个方法展示了如何在服务器端处理文件上传并提供用户反馈。</p>
+<h2 id="代码实现详解" tabindex="-1"><a class="header-anchor" href="#代码实现详解"><span>代码实现详解</span></a></h2>
+<div class="language-csharp line-numbers-mode" data-highlighter="prismjs" data-ext="cs"><pre v-pre><code><span class="line"><span class="token keyword">private</span> <span class="token keyword">async</span> <span class="token return-type class-name">Task<span class="token punctuation">&lt;</span><span class="token keyword">bool</span><span class="token punctuation">></span></span> <span class="token function">SaveToFile</span><span class="token punctuation">(</span><span class="token class-name">UploadFile</span> file<span class="token punctuation">)</span></span>
+<span class="line"><span class="token punctuation">{</span></span>
+<span class="line">    <span class="token class-name"><span class="token keyword">var</span></span> ret <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span></span>
+<span class="line">    <span class="token keyword">try</span></span>
+<span class="line">    <span class="token punctuation">{</span></span>
+<span class="line">        <span class="token comment">// 获取wwwroot目录的物理路径</span></span>
+<span class="line">        <span class="token class-name"><span class="token keyword">var</span></span> webRootPath <span class="token operator">=</span> Path<span class="token punctuation">.</span><span class="token function">Combine</span><span class="token punctuation">(</span>Directory<span class="token punctuation">.</span><span class="token function">GetCurrentDirectory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string">"wwwroot"</span><span class="token punctuation">)</span><span class="token punctuation">;</span></span>
+<span class="line">        <span class="token class-name"><span class="token keyword">var</span></span> uploaderFolder <span class="token operator">=</span> Path<span class="token punctuation">.</span><span class="token function">Combine</span><span class="token punctuation">(</span>webRootPath<span class="token punctuation">,</span> <span class="token string">"images"</span><span class="token punctuation">,</span> <span class="token string">"uploader"</span><span class="token punctuation">)</span><span class="token punctuation">;</span></span>
+<span class="line">        </span>
+<span class="line">        <span class="token comment">// 确保目录存在</span></span>
+<span class="line">        Directory<span class="token punctuation">.</span><span class="token function">CreateDirectory</span><span class="token punctuation">(</span>uploaderFolder<span class="token punctuation">)</span><span class="token punctuation">;</span></span>
+<span class="line">        </span>
+<span class="line">        <span class="token comment">// 生成唯一文件名</span></span>
+<span class="line">        file<span class="token punctuation">.</span>FileName <span class="token operator">=</span> <span class="token interpolation-string"><span class="token string">$"</span><span class="token interpolation"><span class="token punctuation">{</span><span class="token expression language-csharp">Path<span class="token punctuation">.</span><span class="token function">GetFileNameWithoutExtension</span><span class="token punctuation">(</span>file<span class="token punctuation">.</span>OriginFileName<span class="token punctuation">)</span></span><span class="token punctuation">}</span></span><span class="token string">-</span><span class="token interpolation"><span class="token punctuation">{</span><span class="token expression language-csharp">DateTimeOffset<span class="token punctuation">.</span>Now</span><span class="token format-string"><span class="token punctuation">:</span>yyyyMMddHHmmss</span><span class="token punctuation">}</span></span><span class="token interpolation"><span class="token punctuation">{</span><span class="token expression language-csharp">Path<span class="token punctuation">.</span><span class="token function">GetExtension</span><span class="token punctuation">(</span>file<span class="token punctuation">.</span>OriginFileName<span class="token punctuation">)</span></span><span class="token punctuation">}</span></span><span class="token string">"</span></span><span class="token punctuation">;</span></span>
+<span class="line">        <span class="token class-name"><span class="token keyword">var</span></span> fileName <span class="token operator">=</span> Path<span class="token punctuation">.</span><span class="token function">Combine</span><span class="token punctuation">(</span>uploaderFolder<span class="token punctuation">,</span> file<span class="token punctuation">.</span>FileName<span class="token punctuation">)</span><span class="token punctuation">;</span></span>
+<span class="line"></span>
+<span class="line">        <span class="token comment">// 保存文件</span></span>
+<span class="line">        ReadToken <span class="token operator">??=</span> <span class="token keyword">new</span> <span class="token constructor-invocation class-name">CancellationTokenSource</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></span>
+<span class="line">        ret <span class="token operator">=</span> <span class="token keyword">await</span> file<span class="token punctuation">.</span><span class="token function">SaveToFileAsync</span><span class="token punctuation">(</span>fileName<span class="token punctuation">,</span> MaxFileLength<span class="token punctuation">,</span> ReadToken<span class="token punctuation">.</span>Token<span class="token punctuation">)</span><span class="token punctuation">;</span></span>
+<span class="line"></span>
+<span class="line">        <span class="token keyword">if</span> <span class="token punctuation">(</span>ret<span class="token punctuation">)</span></span>
+<span class="line">        <span class="token punctuation">{</span></span>
+<span class="line">            file<span class="token punctuation">.</span>PrevUrl <span class="token operator">=</span> <span class="token interpolation-string"><span class="token string">$"/images/uploader/</span><span class="token interpolation"><span class="token punctuation">{</span><span class="token expression language-csharp">file<span class="token punctuation">.</span>FileName</span><span class="token punctuation">}</span></span><span class="token string">"</span></span><span class="token punctuation">;</span></span>
+<span class="line">            <span class="token keyword">await</span> MessageService<span class="token punctuation">.</span><span class="token function">Success</span><span class="token punctuation">(</span><span class="token string">"文件上传成功！"</span><span class="token punctuation">)</span><span class="token punctuation">;</span></span>
+<span class="line">        <span class="token punctuation">}</span></span>
+<span class="line">        <span class="token keyword">else</span></span>
+<span class="line">        <span class="token punctuation">{</span></span>
+<span class="line">            <span class="token comment">// 处理保存失败情况</span></span>
+<span class="line">            <span class="token class-name"><span class="token keyword">var</span></span> errorMessage <span class="token operator">=</span> <span class="token interpolation-string"><span class="token string">$"保存文件失败 </span><span class="token interpolation"><span class="token punctuation">{</span><span class="token expression language-csharp">file<span class="token punctuation">.</span>OriginFileName</span><span class="token punctuation">}</span></span><span class="token string">"</span></span><span class="token punctuation">;</span></span>
+<span class="line">            file<span class="token punctuation">.</span>Code <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span></span>
+<span class="line">            file<span class="token punctuation">.</span>Error <span class="token operator">=</span> errorMessage<span class="token punctuation">;</span></span>
+<span class="line">            <span class="token keyword">await</span> MessageService<span class="token punctuation">.</span><span class="token function">Error</span><span class="token punctuation">(</span><span class="token interpolation-string"><span class="token string">$"上传文件</span><span class="token interpolation"><span class="token punctuation">{</span><span class="token expression language-csharp">errorMessage</span><span class="token punctuation">}</span></span><span class="token string">"</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span></span>
+<span class="line">        <span class="token punctuation">}</span></span>
+<span class="line">    <span class="token punctuation">}</span></span>
+<span class="line">    <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> ex<span class="token punctuation">)</span></span>
+<span class="line">    <span class="token punctuation">{</span></span>
+<span class="line">        <span class="token comment">// 异常处理</span></span>
+<span class="line">        file<span class="token punctuation">.</span>Code <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span></span>
+<span class="line">        file<span class="token punctuation">.</span>Error <span class="token operator">=</span> ex<span class="token punctuation">.</span>Message<span class="token punctuation">;</span></span>
+<span class="line">        <span class="token keyword">await</span> MessageService<span class="token punctuation">.</span><span class="token function">Error</span><span class="token punctuation">(</span><span class="token interpolation-string"><span class="token string">$"文件上传失败: </span><span class="token interpolation"><span class="token punctuation">{</span><span class="token expression language-csharp">ex<span class="token punctuation">.</span>Message</span><span class="token punctuation">}</span></span><span class="token string">"</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span></span>
+<span class="line">        ret <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span></span>
+<span class="line">    <span class="token punctuation">}</span></span>
+<span class="line">    <span class="token keyword">return</span> ret<span class="token punctuation">;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="关键功能特性" tabindex="-1"><a class="header-anchor" href="#关键功能特性"><span>关键功能特性</span></a></h2>
+<ol>
+<li>
+<p><strong>文件格式验证</strong></p>
+<div class="language-csharp line-numbers-mode" data-highlighter="prismjs" data-ext="cs"><pre v-pre><code><span class="line"><span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token return-type class-name"><span class="token keyword">bool</span></span> <span class="token function">CheckValidAvatarFormat</span><span class="token punctuation">(</span><span class="token class-name"><span class="token keyword">string</span></span> format<span class="token punctuation">)</span></span>
+<span class="line"><span class="token punctuation">{</span></span>
+<span class="line">    <span class="token keyword">return</span> <span class="token string">"jpg;png;bmp;gif;jpeg"</span><span class="token punctuation">.</span><span class="token function">Split</span><span class="token punctuation">(</span><span class="token char">';'</span><span class="token punctuation">)</span></span>
+<span class="line">        <span class="token punctuation">.</span><span class="token function">Any</span><span class="token punctuation">(</span>f <span class="token operator">=></span> format<span class="token punctuation">.</span><span class="token function">Contains</span><span class="token punctuation">(</span>f<span class="token punctuation">,</span> StringComparison<span class="token punctuation">.</span>OrdinalIgnoreCase<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div></li>
+<li>
+<p><strong>文件大小限制</strong></p>
+<div class="language-csharp line-numbers-mode" data-highlighter="prismjs" data-ext="cs"><pre v-pre><code><span class="line"><span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token return-type class-name"><span class="token keyword">long</span></span> MaxFileLength <span class="token operator">=></span> <span class="token number">5</span> <span class="token operator">*</span> <span class="token number">1024</span> <span class="token operator">*</span> <span class="token number">1024</span><span class="token punctuation">;</span> <span class="token comment">// 5MB</span></span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div></div></div></li>
+<li>
+<p><strong>图片处理</strong></p>
+<ul>
+<li>支持图片尺寸调整（640x480）</li>
+<li>转换为Base64格式</li>
+<li>支持取消上传操作</li>
+</ul>
+</li>
+</ol>
+<h2 id="实现细节" tabindex="-1"><a class="header-anchor" href="#实现细节"><span>实现细节</span></a></h2>
+<ol>
+<li>
+<p><strong>取消令牌处理</strong></p>
+<ul>
+<li>使用 CancellationTokenSource 管理上传操作</li>
+<li>支持取消正在进行的上传</li>
+</ul>
+</li>
+<li>
+<p><strong>错误处理</strong></p>
+<ul>
+<li>文件格式验证</li>
+<li>上传错误提示</li>
+<li>友好的用户反馈</li>
+</ul>
+</li>
+<li>
+<p><strong>文件保存</strong></p>
+<ul>
+<li>异步保存文件</li>
+<li>生成唯一文件名</li>
+<li>提供预览URL</li>
+</ul>
+</li>
+</ol>
+<h2 id="最佳实践建议" tabindex="-1"><a class="header-anchor" href="#最佳实践建议"><span>最佳实践建议</span></a></h2>
+<ol>
+<li>
+<p><strong>安全性考虑</strong></p>
+<ul>
+<li>严格控制允许的文件类型</li>
+<li>限制文件大小</li>
+<li>验证文件内容</li>
+</ul>
+</li>
+<li>
+<p><strong>性能优化</strong></p>
+<ul>
+<li>图片压缩</li>
+<li>异步处理</li>
+<li>适当的超时处理</li>
+</ul>
+</li>
+<li>
+<p><strong>用户体验</strong></p>
+<ul>
+<li>上传进度提示</li>
+<li>错误信息反馈</li>
+<li>预览功能</li>
+</ul>
+</li>
+</ol>
+<h2 id="使用示例" tabindex="-1"><a class="header-anchor" href="#使用示例"><span>使用示例</span></a></h2>
+<div class="language-razor line-numbers-mode" data-highlighter="prismjs" data-ext="razor"><pre v-pre><code><span class="line"><span class="token block"><span class="token keyword">@code</span> <span class="token csharp language-csharp"><span class="token punctuation">{</span></span>
+<span class="line">    <span class="token keyword">private</span> <span class="token keyword">async</span> <span class="token return-type class-name">Task</span> <span class="token function">HandleAvatarUpload</span><span class="token punctuation">(</span><span class="token class-name">UploadFile</span> file<span class="token punctuation">)</span></span>
+<span class="line">    <span class="token punctuation">{</span></span>
+<span class="line">        <span class="token keyword">if</span> <span class="token punctuation">(</span>file <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span></span>
+<span class="line">        <span class="token punctuation">{</span></span>
+<span class="line">            <span class="token comment">// 处理上传逻辑</span></span>
+<span class="line">            <span class="token keyword">await</span> <span class="token function">OnAvatarUpload</span><span class="token punctuation">(</span>file<span class="token punctuation">)</span><span class="token punctuation">;</span></span>
+<span class="line">            <span class="token comment">// 更新UI或者其他后续操作</span></span>
+<span class="line">        <span class="token punctuation">}</span></span>
+<span class="line">    <span class="token punctuation">}</span></span>
+<span class="line"><span class="token punctuation">}</span></span></span></span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="总结" tabindex="-1"><a class="header-anchor" href="#总结"><span>总结</span></a></h2>
+<p>AvatarUpload 组件提供了一个完整的头像上传解决方案，包含文件验证、大小限制、格式转换等功能。通过合理的错误处理和用户反馈机制，提供了良好的用户体验。在实际使用中，可以根据具体需求进行定制和扩展。</p>
+<hr>
+<blockquote>
+<p>作者：Claude</p>
+<p>日期：2024-03-21</p>
+<p>标签：Blazor, 头像上传, 文件处理, C#, .NET</p>
+</blockquote>
+</div></template>
+
+
