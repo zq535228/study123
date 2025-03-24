@@ -5,12 +5,12 @@ import { plumeTheme } from 'vuepress-theme-plume'
 export default defineUserConfig({
   base: '/',
   lang: 'en-US',
-  title: 'jyds_blog',
-  description: '',
+  title: '检验大叔',
+  description: '医工结合的技术博客',
 
   head: [
     // 配置站点图标
-    ['link', { rel: 'icon', type: 'image/png', href: 'https://theme-plume.vuejs.press/favicon-32x32.png' }],
+    ['link', { rel: 'icon', type: 'image/png', href: 'https://image.jianyandashu.com/i/2024/12/16/676022827d7a0.png' }],
   ],
 
   bundler: viteBundler(),

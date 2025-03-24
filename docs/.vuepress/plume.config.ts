@@ -6,7 +6,7 @@ import { notes } from './notes'
  * @see https://theme-plume.vuejs.press/config/basic/
  */
 export default defineThemeConfig({
-  logo: 'https://theme-plume.vuejs.press/plume.png',
+  logo: 'https://image.jianyandashu.com/i/2024/12/16/676022827d7a0.png',
 
   appearance: true,  // 配置 深色模式
 
@@ -37,9 +37,9 @@ export default defineThemeConfig({
    * @see https://theme-plume.vuejs.press/config/basic/#profile
    */
   profile: {
-    avatar: 'https://theme-plume.vuejs.press/plume.png',
-    name: 'jyds_blog',
-    description: '',
+    avatar: 'https://image.jianyandashu.com/i/2024/12/16/676022827d7a0.png',
+    name: '检验大叔',
+    description: '医工结合的技术博客',
     // circle: true,
     // location: '',
     // organization: '',
