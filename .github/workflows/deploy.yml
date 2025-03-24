@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # “最近更新时间” 等 git 日志相关信息，需要拉取全部提交记录
+          # "最近更新时间" 等 git 日志相关信息，需要拉取全部提交记录
           # "Last updated time" and other git log-related information require fetching all commit records.
           fetch-depth: 0
 
@@ -50,3 +50,9 @@ jobs:
           target_branch: html
           # 部署目录为 VuePress 的默认输出目录
           build_dir: docs/.vuepress/dist
+
+      # 创建CNAME文件以保持自定义域名
+      - name: Create CNAME file
+        run: |
+          echo "blog.jianyandashu.com" > docs/.vuepress/dist/CNAME
+        if: success()
