@@ -1,3 +1,13 @@
+---
+title: 在ASP.NET Core中配置CORS策略
+tags:
+  - CORS
+  - ASP.NET
+  — Program
+createTime: 2025/03/24 19:52:18
+permalink: /article/CORS/
+---
+
 # 在ASP.NET Core中配置CORS策略
 
 在现代Web应用程序中，跨域资源共享（CORS）是一个重要的安全特性。它允许或限制不同来源的Web应用程序访问服务器资源。在ASP.NET Core中，我们可以通过配置CORS策略来控制这些访问。
