@@ -12,7 +12,7 @@ permalink: /article/vuepress-github-pages/
 
 我的场景：
 
-采用https://<USERNAME>.github.io/<REPO>的形式
+采用https://USERNAME.github.io/repo 的形式
 自定义二级域名
 Travis CI 自动部署
 访问地址：https://snippet.noxxxx.com
