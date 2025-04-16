@@ -99,10 +99,10 @@ public class DataTransferService
         return DesEncrypt.Encrypt(json, TransferKey);
     }
 
-    public T DecryptData<T>(string encryptedData)
+    public T DecryptData《T》(string encryptedData)
     {
         var json = DesEncrypt.Decrypt(encryptedData, TransferKey);
-        return System.Text.Json.JsonSerializer.Deserialize<T>(json);
+        return System.Text.Json.JsonSerializer.Deserialize《T》(json);
     }
 }
 ```

@@ -93,7 +93,7 @@ private async Task ImportExcelData(InputFileChangeEventArgs e)
    - 导入完成后删除临时文件
 
 2. **MiniExcel使用**
-   - 使用`QueryAsync<T>`方法将Excel数据直接映射到实体类
+   - 使用`QueryAsync《T》`方法将Excel数据直接映射到实体类
    - 支持异步操作,避免阻塞UI线程
 
 3. **数据库操作**

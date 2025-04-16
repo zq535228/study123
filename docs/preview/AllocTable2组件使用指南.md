@@ -41,6 +41,25 @@ AllocTable2是一个基于Blazor和FreeSql的数据分配组件，主要用于�
 }
 ```
 
+
+## 基本用法
+如果只有<TableTd1>@context.CozeKey</TableTd1>，那么会显示Id,并且4列
+如果包含了其他的标签,那么会按row展示.
+```
+<TableTd1>@context.Id</TableTd1>
+    <TableHeader>
+        <th>试题内容</th>
+        <th>正确答案</th>
+   
+    </TableHeader>
+    <TableRow>
+        <td>@context.Content</td>
+        <td>@context.Answer</td>
+    </TableRow>
+
+
+```
+
 ## 主要参数
 
 ### 1. 泛型参数
