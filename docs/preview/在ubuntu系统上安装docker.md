@@ -12,8 +12,16 @@ permalink: /article/install-docker-on-ubuntu/
 # 安装docker
 
 ```
- curl -fsSL https://test.docker.com -o test-docker.sh
- sudo sh test-docker.sh
+sudo apt update
+sudo apt install curl
+curl -fsSL https://test.docker.com -o test-docker.sh
+sudo sh test-docker.sh
+
+docker run -d --restart=always -p 3001:3001 -v uptime-kuma:/app/data --name uptime-kuma louislam/uptime-kuma:1
+
+npm 代理服务器的安装
+
+
 ```
 
 参考文章
