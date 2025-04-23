@@ -2,7 +2,7 @@
 title: ASP.NET Core 中禁用自动模型验证过滤器的详细解析
 tags:
   - ASP.NET Core
-createTime: 2023/04/23 10:00:00
+createTime: 2025/04/23 10:00:00
 permalink: /article/aspnet-core-suppress-model-validation
 ---
 
