@@ -12,6 +12,10 @@ permalink: /article/install-docker-on-ubuntu/
 # 安装docker
 
 ```
+curl -sS -O https://kejilion.pro/kejilion.sh && chmod +x kejilion.sh && ./kejilion.sh
+
+
+
 sudo apt update
 sudo apt install curl
 curl -fsSL https://test.docker.com -o test-docker.sh
