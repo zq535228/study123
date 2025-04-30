@@ -14,7 +14,9 @@ permalink: /article/install-docker-on-ubuntu/
 ```
 curl -sS -O https://kejilion.pro/kejilion.sh && chmod +x kejilion.sh && ./kejilion.sh
 
-
+```
+apt-get update
+```
 
 sudo apt update
 sudo apt install curl
