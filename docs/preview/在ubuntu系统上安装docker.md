@@ -16,6 +16,10 @@ curl -sS -O https://kejilion.pro/kejilion.sh && chmod +x kejilion.sh && ./kejili
 
 ```
 apt-get update
+
+apt-get install wget
+apt-get install sudo
+
 ```
 
 sudo apt update
